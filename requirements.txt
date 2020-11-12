@@ -1,0 +1,8 @@
+
+config==0.5.0.post0
+DateTime==4.3
+flasgger==0.9.5
+Flask==1.1.2
+flask-restplus==0.13.0
+fpdf==1.7.2
+Werkzeug==1.0.1
