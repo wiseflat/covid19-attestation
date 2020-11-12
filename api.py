@@ -14,47 +14,47 @@ app = Flask(__name__)
 
 def document(args, date):
 
-  if(args.sex == 'H'):
-    sex = ''
+  if(args.sexe == 'H'):
+    sexe = ''
     genre = 'M.'
   else:
-    sex = 'e'
+    sexe = 'e'
     genre = 'Mme'
-  if(args.reason == 'Convocation'):
-    reason = "Convocation judiciaire ou administrative et pour se rendre dans un service public"
-  if(args.reason == 'Missions'):
-    reason = "Participation à des missions d'intérêt général sur demande de l'autorité administrative"
-  if(args.reason == 'Handicap'):
-    reason = "Déplacement des personnes en situation de handicap et leur accompagnant."
-  if(args.reason == 'Santé'):
-    reason = "Consultations, examens et soins ne pouvant être assurés à distance et l’achat de médicaments."
-  if(args.reason == 'Enfants'):
-    reason = "Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires"
-  if(args.reason == 'Famille'):
-    reason = "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants."
-  if(args.reason == 'Sports et animaux'):
-    reason = "Déplacements brefs, dans la limite d'une heure quotidienne et dans un rayon maximal d'un kilomètre autour du domicile, liés soit à l'activité physique individuelle des personnes, à l'exclusion de toute pratique sportive collective et de toute proximité avec d'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie."
-  if(args.reason == 'Travail'):
-    reason = "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation, déplacements professionnels ne pouvant être différés , déplacements pour un concours ou un examen."
-  if(args.reason == 'Achats'):
-    reason = "Déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, des achats de première nécessité3 dans des établissements dont les activités demeurent autorisées, le retrait de commande et les livraisons à domicile."
+  if(args.motif == 'Convocation'):
+    motif = "Convocation judiciaire ou administrative et pour se rendre dans un service public"
+  if(args.motif == 'Missions'):
+    motif = "Participation à des missions d'intérêt général sur demande de l'autorité administrative"
+  if(args.motif == 'Handicap'):
+    motif = "Déplacement des personnes en situation de handicap et leur accompagnant."
+  if(args.motif == 'Santé'):
+    motif = "Consultations, examens et soins ne pouvant être assurés à distance et l’achat de médicaments."
+  if(args.motif == 'Enfants'):
+    motif = "Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires"
+  if(args.motif == 'Famille'):
+    motif = "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants."
+  if(args.motif == 'Sports et animaux'):
+    motif = "Déplacements brefs, dans la limite d'une heure quotidienne et dans un rayon maximal d'un kilomètre autour du domicile, liés soit à l'activité physique individuelle des personnes, à l'exclusion de toute pratique sportive collective et de toute proximité avec d'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie."
+  if(args.motif == 'Travail'):
+    motif = "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation, déplacements professionnels ne pouvant être différés , déplacements pour un concours ou un examen."
+  if(args.motif == 'Achats'):
+    motif = "Déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, des achats de première nécessité3 dans des établissements dont les activités demeurent autorisées, le retrait de commande et les livraisons à domicile."
 
   return f'''ATTESTATION DE DÉPLACEMENT DÉROGATOIRE
 
 En application du décret n°2020-1310 du 29 octobre 2020 prescrivant les mesures générales nécessaires pour faire face à l'épidémie de Covid19 dans le cadre de l'état d'urgence sanitaire
 
-Je soussigné{sex},
-{genre} {args.firstname} {args.lastname}
-Né{sex} le {args.birthday} à {args.place_of_birth}
-Demeurant : {args.address} {args.city} 
+Je soussigné{sexe},
+{genre} {args.prenom} {args.nom}
+Né{sexe} le {args.naissance} à {args.lieu}
+Demeurant : {args.adresse} {args.ville} 
 certifie que mon déplacement est lié au motif suivant autorisé par le décret n°2020-1310 du 29 octobre 2020 prescrivant les mesures générales nécessaires pour faire face à l'épidémie de Covid19 dans le cadre de l'état d'urgence sanitaire :
 
-{reason}
+{motif}
 
-Fait à {args.city}
+Fait à {args.ville}
 Le {date.day}/{date.month}/{date.year}  à {date.hour}:{date.minute}
 
-Signature : {args.firstname} {args.lastname}
+Signature : {args.prenom} {args.nom}
 '''
 
 template = {
@@ -80,15 +80,15 @@ app.config.from_object(config.Config)
 api = Api(app)
 
 parser = reqparse.RequestParser()
-parser.add_argument('sex', type=inputs.regex('H|M'), required=True, help='Sexe (H/F)')
-parser.add_argument('firstname', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s]{2,20}$'), required=True, help='Prénom')
-parser.add_argument('lastname', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Nom de famille')
-parser.add_argument('birthday', type=inputs.regex(r'^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$'), required=True, help='Date de naissance')
-parser.add_argument('place_of_birth', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s]{2,30}$'), required=True, help='Ville de naissance')
-parser.add_argument('address', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü0-9\s]{2,50}$'), required=True, help='Adresse')
-parser.add_argument('city', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s]{2,30}$'), required=True, help='Ville')
-parser.add_argument('postcode', type=inputs.regex(r'\d{5}'), required=True, help='Code postal')
-parser.add_argument('reason', type=inputs.regex('(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)'), required=True, help='motif')
+parser.add_argument('sexe', type=inputs.regex('H|M'), required=True, help='Sexe (H/F)')
+parser.add_argument('prenom', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,20}$'), required=True, help='Prénom')
+parser.add_argument('nom', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Nom de famille')
+parser.add_argument('naissance', type=inputs.regex(r'^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$'), required=True, help='Date de naissance')
+parser.add_argument('lieu', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Ville de naissance')
+parser.add_argument('adresse', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü0-9\s]{2,50}$'), required=True, help='Adresse')
+parser.add_argument('ville', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Ville')
+parser.add_argument('codepostal', type=inputs.regex(r'\d{5}'), required=True, help='Code postal')
+parser.add_argument('motif', type=inputs.regex('(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)'), required=True, help='motif')
 
 @app.errorhandler(404)
 def not_found(error):
@@ -111,47 +111,47 @@ class Attestation(Resource):
         Formulaire de création de l'attestation
         ---
         parameters:
-        - name: sex
+        - name: sexe
           in: formData
           type: string
           required: true
           description: Sexe (H/F)
-        - name: firstname
+        - name: prenom
           in: formData
           type: string
           required: true
           description: Prénom
-        - name: lastname
+        - name: nom
           in: formData
           type: string
           required: true
           description: Nom de famille
-        - name: birthday
+        - name: naissance
           in: formData
           type: string
           required: true
           description: Date de naissance
-        - name: place_of_birth
+        - name: lieu
           in: formData
           type: string
           required: true
           description: Ville de naissance
-        - name: address
+        - name: adresse
           in: formData
           type: string
           required: true
           description: Adresse
-        - name: city
+        - name: ville
           in: formData
           type: string
           required: true
           description: Ville
-        - name: postcode
+        - name: codepostal
           in: formData
           type: string
           required: true
           description: Code postal
-        - name: reason
+        - name: motif
           in: formData
           type: string
           enum: ['Convocation', 'Missions', 'Handicap', 'Santé', 'Enfants', 'Famille', 'Sports et animaux', 'Travail', 'Achats']
