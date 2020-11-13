@@ -22,7 +22,7 @@ Une API Swagger est accesible à l'adresse http://localhost:3000 pour tester l'a
 
 ## Application raccourci pour Iphone
 
-Télécharger mon [raccourci](https://www.icloud.com/shortcuts/ba9ee85ca78e4d0abe8a673151a63e44)
+Télécharger mon [raccourci](https://www.icloud.com/shortcuts/92b35138c7c3424c87b519d4657965f9)
 
 # Licence & Copyright
 
