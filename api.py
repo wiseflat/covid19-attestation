@@ -7,9 +7,11 @@ from flask import Flask, send_file
 from flask_restplus import Api, Resource, fields, reqparse, inputs
 from fpdf import FPDF
 from werkzeug.utils import cached_property
+# from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
-app.config.SWAGGER_VALIDATOR_URL = 'https://covid19.api.wiseflat.com/swagger.json'
+app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(app, version='1.0', title='covid API', description='API pour générer une attestation de déplacement')
 
 regex_sexe = r'^(H|F)$'
