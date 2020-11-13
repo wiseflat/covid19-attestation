@@ -1,45 +1,65 @@
 #!/usr/bin/python3
 import datetime
-import config
 import os
-import werkzeug
-werkzeug.cached_property = werkzeug.utils.cached_property
+import uuid 
 
-from flask import Flask, jsonify, make_response, send_file, request
-from flask_restplus import Resource, Api, reqparse, inputs
-from flasgger import Swagger
+from flask import Flask, send_file
+from flask_restplus import Api, Resource, fields, reqparse, inputs
 from fpdf import FPDF
+from werkzeug.utils import cached_property
+
 
 app = Flask(__name__)
+api = Api(app)
 
-def document(args, date):
+regex_sexe = r'^(H|F)$'
+regex_string = r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,50}$'
+regex_naissance = r'^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$'
+regex_adresse = r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü0-9\s]{2,50}$'
+regex_codepostal = r'\d{5}'
+regex_motif = r'(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)'
 
-  if(args.sexe == 'H'):
-    sexe = ''
-    genre = 'M.'
-  else:
-    sexe = 'e'
-    genre = 'Mme'
-  if(args.motif == 'Convocation'):
-    motif = "Convocation judiciaire ou administrative et pour se rendre dans un service public"
-  if(args.motif == 'Missions'):
-    motif = "Participation à des missions d'intérêt général sur demande de l'autorité administrative"
-  if(args.motif == 'Handicap'):
-    motif = "Déplacement des personnes en situation de handicap et leur accompagnant."
-  if(args.motif == 'Santé'):
-    motif = "Consultations, examens et soins ne pouvant être assurés à distance et l’achat de médicaments."
-  if(args.motif == 'Enfants'):
-    motif = "Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires"
-  if(args.motif == 'Famille'):
-    motif = "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants."
-  if(args.motif == 'Sports et animaux'):
-    motif = "Déplacements brefs, dans la limite d'une heure quotidienne et dans un rayon maximal d'un kilomètre autour du domicile, liés soit à l'activité physique individuelle des personnes, à l'exclusion de toute pratique sportive collective et de toute proximité avec d'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie."
-  if(args.motif == 'Travail'):
-    motif = "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation, déplacements professionnels ne pouvant être différés , déplacements pour un concours ou un examen."
-  if(args.motif == 'Achats'):
-    motif = "Déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, des achats de première nécessité3 dans des établissements dont les activités demeurent autorisées, le retrait de commande et les livraisons à domicile."
+parser = reqparse.RequestParser()
+parser.add_argument('sexe', type=inputs.regex(regex_sexe), required=True, help='Sexe (H/F)')
+parser.add_argument('prenom', type=inputs.regex(regex_string), required=True, help='Prénom')
+parser.add_argument('nom', type=inputs.regex(regex_string), required=True, help='Nom de famille')
+parser.add_argument('naissance', type=inputs.regex(regex_naissance), required=True, help='Date de naissance')
+parser.add_argument('lieu', type=inputs.regex(regex_string), required=True, help='Ville de naissance')
+parser.add_argument('adresse', type=inputs.regex(regex_adresse), required=True, help='Adresse')
+parser.add_argument('ville', type=inputs.regex(regex_string), required=True, help='Ville')
+parser.add_argument('codepostal', type=inputs.regex(regex_codepostal), required=True, help='Code postal')
+parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help='motif')
 
-  return f'''ATTESTATION DE DÉPLACEMENT DÉROGATOIRE
+def document(args):
+
+    date = datetime.datetime.now()
+
+    if(args.sexe == 'H'):
+        sexe = ''
+        genre = 'M.'
+    else:
+        sexe = 'e'
+        genre = 'Mme'
+    if(args.motif == 'Convocation'):
+        motif = "Convocation judiciaire ou administrative et pour se rendre dans un service public"
+    if(args.motif == 'Missions'):
+        motif = "Participation à des missions d'intérêt général sur demande de l'autorité administrative"
+    if(args.motif == 'Handicap'):
+        motif = "Déplacement des personnes en situation de handicap et leur accompagnant."
+    if(args.motif == 'Santé'):
+        motif = "Consultations, examens et soins ne pouvant être assurés à distance et l’achat de médicaments."
+    if(args.motif == 'Enfants'):
+        motif = "Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires"
+    if(args.motif == 'Famille'):
+        motif = "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants."
+    if(args.motif == 'Sports et animaux'):
+        motif = "Déplacements brefs, dans la limite d'une heure quotidienne et dans un rayon maximal d'un kilomètre autour du domicile, liés soit à l'activité physique individuelle des personnes, à l'exclusion de toute pratique sportive collective et de toute proximité avec d'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie."
+    if(args.motif == 'Travail'):
+        motif = "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation, déplacements professionnels ne pouvant être différés , déplacements pour un concours ou un examen."
+    if(args.motif == 'Achats'):
+        motif = "Déplacements pour effectuer des achats de fournitures nécessaires à l'activité professionnelle, des achats de première nécessité3 dans des établissements dont les activités demeurent autorisées, le retrait de commande et les livraisons à domicile."
+
+    texte = f'''ATTESTATION DE DÉPLACEMENT DÉROGATOIRE
 
 En application du décret n°2020-1310 du 29 octobre 2020 prescrivant les mesures générales nécessaires pour faire face à l'épidémie de Covid19 dans le cadre de l'état d'urgence sanitaire
 
@@ -57,136 +77,32 @@ Le {date.day}/{date.month}/{date.year}  à {date.hour}:{date.minute}
 Signature : {args.prenom} {args.nom}
 '''
 
-template = {
-  "info": {
-    "title": "covid API",
-    "description": "API pour générer une attestation de déplacement",
-    "version": "0.0.1",
-    "contact": {
-      "name": "Mathieu Garcia",
-      "url": "https://covid19.api.wiseflat.com",
-    }
-  }
-}
-
-app.config['SWAGGER'] = {
-    'title': 'My API',
-    'uiversion': 3,
-    "specs_route": "/"
-}
-swagger = Swagger(app, template= template)
-app.config.from_object(config.Config)
-
-api = Api(app)
-
-parser = reqparse.RequestParser()
-parser.add_argument('sexe', type=inputs.regex('H|M'), required=True, help='Sexe (H/F)')
-parser.add_argument('prenom', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,20}$'), required=True, help='Prénom')
-parser.add_argument('nom', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Nom de famille')
-parser.add_argument('naissance', type=inputs.regex(r'^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$'), required=True, help='Date de naissance')
-parser.add_argument('lieu', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Ville de naissance')
-parser.add_argument('adresse', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü0-9\s]{2,50}$'), required=True, help='Adresse')
-parser.add_argument('ville', type=inputs.regex(r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,30}$'), required=True, help='Ville')
-parser.add_argument('codepostal', type=inputs.regex(r'\d{5}'), required=True, help='Code postal')
-parser.add_argument('motif', type=inputs.regex('(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)'), required=True, help='motif')
+    file_name = os.path.join('/tmp', f'attestation-{uuid.uuid1()}.pdf')
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
+    pdf.set_font('DejaVu', '', 12)
+    pdf.multi_cell(180, 10, texte, 0, 'J', False)
+    pdf.output(file_name, 'F')
+    
+    return file_name
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({"error": "Not found"}), 404)
+    return {"error": "Not found"}
 
-@app.errorhandler(400)
-def bad_request(error):
-    return make_response(jsonify({"error": "bad request"}), 400)
-
-
-@api.route('/')
-class Attestation(Resource):
-
-    def get(self):
-      return jsonify(template)
+@api.route('/pdf')
+class Todo(Resource):
 
     @api.doc(parser=parser)
-    def post(self):
-        """
-        Formulaire de création de l'attestation
-        ---
-        parameters:
-        - name: sexe
-          in: formData
-          type: string
-          required: true
-          description: Sexe (H/F)
-        - name: prenom
-          in: formData
-          type: string
-          required: true
-          description: Prénom
-        - name: nom
-          in: formData
-          type: string
-          required: true
-          description: Nom de famille
-        - name: naissance
-          in: formData
-          type: string
-          required: true
-          description: Date de naissance
-        - name: lieu
-          in: formData
-          type: string
-          required: true
-          description: Ville de naissance
-        - name: adresse
-          in: formData
-          type: string
-          required: true
-          description: Adresse
-        - name: ville
-          in: formData
-          type: string
-          required: true
-          description: Ville
-        - name: codepostal
-          in: formData
-          type: string
-          required: true
-          description: Code postal
-        - name: motif
-          in: formData
-          type: string
-          enum: ['Convocation', 'Missions', 'Handicap', 'Santé', 'Enfants', 'Famille', 'Sports et animaux', 'Travail', 'Achats']
-          required: true
-          description: Motif du déplacement
-          default: Travail
-        responses:
-          500:
-            description: Error
-          400:
-            description: Error
-          200:
-            description: Success
-            schema:
-              id: result
-              properties:
-                result:
-                  type: boolean
-                  description: Result of the request
-                message:
-                  type: string
-                  description: A result message
-        """
+    def get(self, **kwargs):
         args = parser.parse_args(strict=True)
-        date = datetime.datetime.now()
-        attestation = document(args, date)       
-        file_name = os.path.join('/tmp', f'attestation-{request.remote_addr}-{date.day}{date.month}{date.year}{date.hour}{date.minute}{date.second}.pdf')
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
-        pdf.set_font('DejaVu', '', 12)
-        pdf.multi_cell(180, 10, attestation, 0, 'J', False)
-        pdf.output(file_name, 'F')
-        
-        return send_file(file_name, as_attachment=True)
+        return send_file(document(args), as_attachment=True)
+
+    @api.doc(parser=parser)
+    def post(self, **kwargs):
+        args = parser.parse_args(strict=True)
+        return send_file(document(args), as_attachment=True)
 
 
 if __name__ == '__main__':
