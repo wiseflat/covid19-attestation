@@ -25,12 +25,12 @@ parser = reqparse.RequestParser()
 parser.add_argument('sexe', type=inputs.regex(regex_sexe), required=True, help='Sexe (H/F)')
 parser.add_argument('prenom', type=inputs.regex(regex_string), required=True, help='Prénom')
 parser.add_argument('nom', type=inputs.regex(regex_string), required=True, help='Nom de famille')
-parser.add_argument('naissance', type=inputs.regex(regex_naissance), required=True, help='Date de naissance')
+parser.add_argument('naissance', type=inputs.regex(regex_naissance), required=True, help='Date de naissance (JJ/MM/AAAA)')
 parser.add_argument('lieu', type=inputs.regex(regex_string), required=True, help='Ville de naissance')
 parser.add_argument('adresse', type=inputs.regex(regex_adresse), required=True, help='Adresse')
 parser.add_argument('ville', type=inputs.regex(regex_string), required=True, help='Ville')
 parser.add_argument('codepostal', type=inputs.regex(regex_codepostal), required=True, help='Code postal')
-parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help='motif')
+parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help='motif (Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)')
 
 def document(args):
 
