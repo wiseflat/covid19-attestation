@@ -2,6 +2,7 @@
 
 Génération d'une attestation de déplacement
 
+https://covid19.api.wiseflat.com
 
 # Installation 
 
@@ -9,21 +10,19 @@ Génération d'une attestation de déplacement
 pip install -r requirements.txt
 ```
 
-# Lancement de l'API
+## Lancement de l'API
 
 ```
 python api.py
 ```
 
-Une API Swagger est accesible à l'adresse http://localhost:3000
+Une API Swagger est accesible à l'adresse http://localhost:3000 pour tester l'application
 
-# Champs du formulaire
+# Utilisation depuis votre téléphone portable
 
-Les champs sont renseignés sur l'interface Swagger
+## Application raccourci pour Iphone
 
-# Utilisation d'un raccourci pour Iphone
-
-Télécharger mon [raccourci](https://www.icloud.com/shortcuts/c3af343170f6461abcb1bf7d85c470a8)
+Télécharger mon [raccourci](https://www.icloud.com/shortcuts/ba9ee85ca78e4d0abe8a673151a63e44)
 
 # Licence & Copyright
 
