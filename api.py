@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import datetime
+import time
 import os
 import uuid 
 
@@ -9,6 +9,9 @@ from fpdf import FPDF
 from werkzeug.utils import cached_property
 # from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+os.environ['TZ'] = 'Europe/Paris'
+time.tzset()
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -34,7 +37,11 @@ parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help
 
 def document(args):
 
-    date = datetime.datetime.now()
+    year = time.strftime('%Y')
+    month = time.strftime('%m')
+    day = time.strftime('%d')
+    hour = time.strftime('%H')
+    minute = time.strftime('%M')
 
     if(args.sexe == 'H'):
         sexe = ''
@@ -74,7 +81,7 @@ certifie que mon déplacement est lié au motif suivant autorisé par le décret
 {motif}
 
 Fait à {args.ville}
-Le {date.day}/{date.month}/{date.year}  à {date.hour}:{date.minute}
+Le {day}/{month}/{year}  à {hour}:{minute}
 
 Signature : {args.prenom} {args.nom}
 '''
