@@ -8,9 +8,9 @@ from flask_restplus import Api, Resource, fields, reqparse, inputs
 from fpdf import FPDF
 from werkzeug.utils import cached_property
 
-
 app = Flask(__name__)
-api = Api(app)
+app.config.SWAGGER_VALIDATOR_URL = 'https://covid19.api.wiseflat.com/swagger.json'
+api = Api(app, version='1.0', title='covid API', description='API pour générer une attestation de déplacement')
 
 regex_sexe = r'^(H|F)$'
 regex_string = r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,50}$'
