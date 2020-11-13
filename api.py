@@ -95,12 +95,12 @@ def not_found(error):
 class Todo(Resource):
 
     @api.doc(parser=parser)
-    def get(self, **kwargs):
+    def get(self):
         args = parser.parse_args(strict=True)
         return send_file(document(args), as_attachment=True)
 
     @api.doc(parser=parser)
-    def post(self, **kwargs):
+    def post(self):
         args = parser.parse_args(strict=True)
         return send_file(document(args), as_attachment=True)
 
