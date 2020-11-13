@@ -19,7 +19,7 @@ regex_string = r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü\s-]{2,50}$
 regex_naissance = r'^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$'
 regex_adresse = r'^[A-Za-zàáâäçèéêëìíîïñòóôöùúûü0-9\s]{2,50}$'
 regex_codepostal = r'\d{5}'
-regex_motif = r'(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)'
+regex_motif = r'(Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports_animaux|Travail|Achats)'
 
 parser = reqparse.RequestParser()
 parser.add_argument('sexe', type=inputs.regex(regex_sexe), required=True, help='Sexe (H/F)')
@@ -30,7 +30,7 @@ parser.add_argument('lieu', type=inputs.regex(regex_string), required=True, help
 parser.add_argument('adresse', type=inputs.regex(regex_adresse), required=True, help='Adresse')
 parser.add_argument('ville', type=inputs.regex(regex_string), required=True, help='Ville')
 parser.add_argument('codepostal', type=inputs.regex(regex_codepostal), required=True, help='Code postal')
-parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help='motif (Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports et animaux|Travail|Achats)')
+parser.add_argument('motif', type=inputs.regex(regex_motif), required=True, help='motif (Convocation|Missions|Handicap|Santé|Enfants|Famille|Sports_animaux|Travail|Achats)')
 
 def document(args):
 
@@ -54,7 +54,7 @@ def document(args):
         motif = "Déplacement pour chercher les enfants à l’école et à l’occasion de leurs activités périscolaires"
     if(args.motif == 'Famille'):
         motif = "Déplacements pour motif familial impérieux, pour l'assistance aux personnes vulnérables et précaires ou la garde d'enfants."
-    if(args.motif == 'Sports et animaux'):
+    if(args.motif == 'Sports_animaux'):
         motif = "Déplacements brefs, dans la limite d'une heure quotidienne et dans un rayon maximal d'un kilomètre autour du domicile, liés soit à l'activité physique individuelle des personnes, à l'exclusion de toute pratique sportive collective et de toute proximité avec d'autres personnes, soit à la promenade avec les seules personnes regroupées dans un même domicile, soit aux besoins des animaux de compagnie."
     if(args.motif == 'Travail'):
         motif = "Déplacements entre le domicile et le lieu d’exercice de l’activité professionnelle ou un établissement d’enseignement ou de formation, déplacements professionnels ne pouvant être différés , déplacements pour un concours ou un examen."
