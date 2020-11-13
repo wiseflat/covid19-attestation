@@ -1,13 +1,16 @@
 #!/usr/bin/python3
 import datetime
 import os
+import qrcode
+import qrcode.image.svg
+
 import uuid 
 
+# from PIL import Image, ImageTk, ImageGrab
 from flask import Flask, send_file
 from flask_restplus import Api, Resource, fields, reqparse, inputs
 from fpdf import FPDF
 from werkzeug.utils import cached_property
-# from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
@@ -68,7 +71,7 @@ En application du décret n°2020-1310 du 29 octobre 2020 prescrivant les mesure
 Je soussigné{sexe},
 {genre} {args.prenom} {args.nom}
 Né{sexe} le {args.naissance} à {args.lieu}
-Demeurant : {args.adresse} {args.ville} 
+Demeurant : {args.adresse} {args.codepostal} {args.ville} 
 certifie que mon déplacement est lié au motif suivant autorisé par le décret n°2020-1310 du 29 octobre 2020 prescrivant les mesures générales nécessaires pour faire face à l'épidémie de Covid19 dans le cadre de l'état d'urgence sanitaire :
 
 {motif}
@@ -79,12 +82,34 @@ Le {date.day}/{date.month}/{date.year}  à {date.hour}:{date.minute}
 Signature : {args.prenom} {args.nom}
 '''
 
+    # qrcode_name = os.path.join('/tmp', f'attestation-{uuid.uuid1()}.png')
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(f'Créé le : {date.day}/{date.month}/{date.year} à {date.hour}:{date.minute}')
+    qr.add_data(f'Nom : {args.nom}')
+    qr.add_data(f'Prénom : {args.prenom}')
+    qr.add_data(f'Naissance : {args.naissance} à {args.lieu}')
+    qr.add_data(f'Adresse : {args.adresse} {args.ville}')
+    qr.add_data(f'Sortie : {date.day}/{date.month}/{date.year} à {date.hour}:{date.minute}')
+    qr.add_data(f'Motif : {args.motif}')
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    # img = qr.make(fit=True, image_factory=qrcode.image.svg.SvgImage)
+    # img = qr.make(image_factory=qrcode.image.svg.SvgImage)
+    # img = qrcode.make('Some data here', image_factory=factory)
+    # qr.make_image(fill_color="black", back_color="white")
+
     file_name = os.path.join('/tmp', f'attestation-{uuid.uuid1()}.pdf')
     pdf = FPDF()
     pdf.add_page()
     pdf.add_font('DejaVu', '', 'DejaVuSansCondensed.ttf', uni=True)
     pdf.set_font('DejaVu', '', 12)
     pdf.multi_cell(180, 10, texte, 0, 'J', False)
+    # pdf.multi_cell(180, 10, img, 0, 'J', False)
     pdf.output(file_name, 'F')
     
     return file_name
